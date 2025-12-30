@@ -1,1 +1,28 @@
+services:
+  db:
+    image: postgres:16
+    env_file: [.env]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    restart: unless-stopped
 
+  api:
+    build: .
+    env_file: [.env]
+    environment:
+      DATABASE_URL: postgresql+psycopg://pmesp:${POSTGRES_PASSWORD}@db:5432/pmesp
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  dbdata:
